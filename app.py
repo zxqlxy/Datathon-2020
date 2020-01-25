@@ -3,11 +3,12 @@ import pandas as pd
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 if uploaded_file is not None:
-	    data = pd.read_csv(uploaded_file)
-	    st.write(data)
+    data = pd.read_csv(uploaded_file)
+    st.write(data)
 
 st.write(data.describe())
 
@@ -16,38 +17,43 @@ st.write(data.describe())
 #     st.button(col)
 
 options = st.multiselect(
-	     'Choose two parameter to plot',
-         # ('Yellow', 'Red')
-	     data.columns)
+    'Choose two parameter to plot',
+    # ('Yellow', 'Red')
+    data.columns)
+
+
 # st.write('You selected:', options)
 
-def plot2(x,y):
-	plt.plot(x,y)
-	st.pyplot()
-
-def plot2(x,y):
-	plt.plot(x,y, '.')
-	st.pyplot()
+def plot2(x, y):
+    plt.plot(x, y)
+    st.pyplot()
 
 
-def plot3(x, y,z):
-	fig = plt.figure()
-	ax = fig.add_subplot(111, projection='3d')
+def plot2(x, y):
+    plt.plot(x, y, '.')
+    st.pyplot()
 
-	n = 100
 
-	# For each set of style and range settings, plot n random points in the box
-	# defined by x in [23, 32], y in [0, 100], z in [zlow, zhigh].
-	for i in range(x):
-	    ax.scatter(x[i], y[i], z[i], marker=m)
+def plot3(x, y, z):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
 
-	ax.set_xlabel('X Label')
-	ax.set_ylabel('Y Label')
-	ax.set_zlabel('Z Label')	
+    n = 100
+
+    # For each set of style and range settings, plot n random points in the box
+    # defined by x in [23, 32], y in [0, 100], z in [zlow, zhigh].
+    for i in range(x):
+        ax.scatter(x[i], y[i], z[i], marker=m)
+
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+
+
 if len(options) == 2:
-	plot2(data[options[0]], data[options[1]])
+    plot2(data[options[0]], data[options[1]])
 elif len(options) == 3:
-	plot3(data[options[0]], data[options[1]], data[options[2]])
+    plot3(data[options[0]], data[options[1]], data[options[2]])
 
 
 def plot_PCA(option='standard'):
@@ -72,7 +78,30 @@ def plot_PCA(option='standard'):
     st.pyplot()
     plt.clf()
 
-	
+
+def plot_Reg(data):
+    X = data[options[0]].values.reshape(1, -1)  # values converts it into a numpy array
+    Y = data[options[1]].values.reshape(1, -1)  # -1 means that calculate the dimension of rows, but have 1 column
+    linear_regressor = LinearRegression()  # create object for the class
+    linear_regressor.fit(X, Y)  # perform linear regression
+    Y_pred = linear_regressor.predict(X)  # make predictions
+    plt.scatter(X, Y)
+    plt.plot(X, Y_pred, color='red')
+    st.pyplot()
+
+
+def histogram_intersection(a, b):
+    v = np.minimum(a, b).sum().round(decimals=1)
+    return v
+
+
+def corelation_coefficient(data):
+    df = pd.DataFrame([data[options[0]], data[options[1]]], columns=options)
+    df.corr(method=histogram_intersection)
+
+
+plot_Reg(data)
+corelation_coefficient(data)
 # progress_bar = st.progress(0)
 # status_text = st.empty()
 # chart = st.line_chart(np.random.randn(10, 2))
