@@ -12,27 +12,49 @@ from sklearn.multioutput import MultiOutputRegressor
 from sklearn.model_selection import train_test_split
 import random
 
-st.sidebar.title("File options")
-uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
+def main():
+	st.sidebar.title("File options")
+	uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
+	if uploaded_file is not None:
+		data = pd.read_csv(uploaded_file)
+		agree = st.checkbox("show raw data")
+		if agree:
+			st.write(data)
 
-st.title("Data Visualization 101")
-st.markdown(
-        """## Important Notes
+	st.title("Data Visualization 101")
+	st.markdown(
+	        """## Important Notes
 
-This app requires the Awesome Streamlit package.
-The Awesome Streamlit package can be installed using
+	This app requires the Awesome Streamlit package.
+	The Awesome Streamlit package can be installed using
 
-`pip install awesome-streamlit`
-""")
+	`pip install awesome-streamlit`
+	""")
 
-st.sidebar.button("Show graph")
+	st.sidebar.button("Show graph")
 
-uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
-if uploaded_file is not None:
-	    data = pd.read_csv(uploaded_file)
-	    st.write(data)
 
-st.write(data.describe())
+
+	st.write(data.describe())
+	dhead = data.head(10)
+	columns = checktype(dhead)
+	# for col in data.columns: 
+	#     print(col) 
+	#     st.button(col)
+
+	options = st.sidebar.multiselect(
+		     'Choose two parameter to plot',
+	         # ('Yellow', 'Red')
+		     columns)
+	# st.write('You selected:', options)
+	if len(options) == 2:
+		plot2(data[options[0]], data[options[1]])
+	elif len(options) == 3:
+		plot3(data[options[0]], data[options[1]], data[options[2]])
+	
+	num_data = data[columns]
+
+
 
 def checktype(df : pd.DataFrame):
 
@@ -40,22 +62,7 @@ def checktype(df : pd.DataFrame):
 	typeDic = values.to_dict()
 	numDic = dict(filter(lambda elem: elem[1] == "float64" or elem[1] == "int64", typeDic.items()))
 	return list(numDic.keys())
-dhead = data.head(10)
-columns = checktype(dhead)
-# for col in data.columns: 
-#     print(col) 
-#     st.button(col)
 
-options = st.multiselect(
-	     'Choose two parameter to plot',
-         # ('Yellow', 'Red')
-	     columns)
-# st.write('You selected:', options)
-
-
-def plot2(x,y):
-	plt.plot(x,y)
-	st.pyplot()
 
 def plot2(x,y):
 	plt.plot(x,y, '.')
@@ -76,14 +83,9 @@ def plot3(x, y,z):
 	ax.set_xlabel('X Label')
 	ax.set_ylabel('Y Label')
 	ax.set_zlabel('Z Label')	
-if len(options) == 2:
-	plot2(data[options[0]], data[options[1]])
-elif len(options) == 3:
-	plot3(data[options[0]], data[options[1]], data[options[2]])
 
 
-num_data = data[columns]
-def plot_PCA(option='standard'):
+def plot_PCA(num_data, option='standard'):
     pca = decomposition.PCA()
     if option == 'standard':
         standard = StandardScaler()
@@ -104,7 +106,7 @@ def plot_PCA(option='standard'):
     st.pyplot()
     plt.clf()
 
-plot_PCA();
+# plot_PCA();
 
 def plot_correlation():
 	f = plt.figure(figsize=(19, 15))
@@ -118,7 +120,7 @@ def plot_correlation():
 	plt.clf()
 
 
-plot_correlation()
+# plot_correlation()
 # progress_bar = st.progress(0)
 # status_text = st.empty()
 # chart = st.line_chart(np.random.randn(10, 2))
@@ -141,3 +143,6 @@ plot_correlation()
 
 # status_text.text('Done!')
 # st.balloons()
+
+if __name__ == '__main__':
+    main()
