@@ -22,9 +22,7 @@ def main():
     uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
     if uploaded_file is not None:
         data = pd.read_csv(uploaded_file)
-        agree = st.checkbox("show raw data")
-        if agree:
-            st.write(data)
+
 
     st.title("Data Visualization 101")
     st.markdown(
@@ -36,7 +34,17 @@ csv file as you want.
     )
 
     if uploaded_file is not None:
-
+    	
+        st.header("Data Exploration")
+        st.markdown(
+                """
+                If you choose one or more parameters to explore, it will generate default summary. If you choose two parameters,
+                it will plot graph for the first parameter over the second parameter.
+                """)
+        agree = st.checkbox("show raw data")
+        if agree:
+            st.write(data)
+            
         dhead = data.head(10)
         columns = checktype(dhead)
         # for col in data.columns:
@@ -44,46 +52,47 @@ csv file as you want.
         #     st.button(col)
 
         options = st.sidebar.multiselect(
-            'Choose two parameter to plot',
+            'Choose parameters to explore',
             # ('Yellow', 'Red')
             columns)
         # st.write('You selected:', options)
 
         if options:
+            
             st.write(data.describe()[options])
 
-        linear = st.checkbox('Plot Linear Regression')
-        graphbtn = st.sidebar.button("Show graph")
+    linear = st.checkbox('Plot Linear Regression')
+    graphbtn = st.sidebar.button("Show graph")
 
-        if len(options) == 2:
+    if len(options) == 2:
 
-            plt.plot(data[options[0]], data[options[1]], '.')
-            if linear:
-                X = data[options[0]].values.reshape(-1, 1)  # values converts it into a numpy array
-                Y = data[options[1]].values.reshape(-1, 1)
-                linear_regressor = LinearRegression()  # create object for the class
-                linear_regressor.fit(X, Y)  # perform linear regression
-                Y_pred = linear_regressor.predict(X)  # make predictions
-                plt.plot(X, Y_pred, color='red')
-            plt.title(options[0] + ' vs ' + options[1])
-            st.pyplot()
-            plt.clf()
+        plt.plot(data[options[0]], data[options[1]], '.')
+        if linear:
+            X = data[options[0]].values.reshape(-1, 1)  # values converts it into a numpy array
+            Y = data[options[1]].values.reshape(-1, 1)
+            linear_regressor = LinearRegression()  # create object for the class
+            linear_regressor.fit(X, Y)  # perform linear regression
+            Y_pred = linear_regressor.predict(X)  # make predictions
+            plt.plot(X, Y_pred, color='red')
+        plt.title(options[0] + ' vs ' + options[1])
+        st.pyplot()
+        plt.clf()
 
-        # elif len(options) == 3:
-        # 	plot3(data[options[0]], data[options[1]], data[options[2]])
+    # elif len(options) == 3:
+    # 	plot3(data[options[0]], data[options[1]], data[options[2]])
 
-        # if linear:
-        # 	plot2(data[options[0]], data[options[1]], linear)
-        #
-        # else:
+    # if linear:
+    # 	plot2(data[options[0]], data[options[1]], linear)
+    #
+    # else:
 
-        num_data = data[columns]
+    num_data = data[columns]
 
-        # plot_Reg(num_data, options)
-        plot_correlation(data, columns)
+    # plot_Reg(num_data, options)
+    plot_correlation(data, columns)
 
-        test_train_split_slider = st.sidebar.slider('training data %', 0, len(data), math.floor(0.2 * len(data)))
-        trainbtn = st.sidebar.button("Train model")
+    test_train_split_slider = st.sidebar.slider('training data %', 0, len(data), math.floor(0.2 * len(data)))
+    trainbtn = st.sidebar.button("Train model")
 
 
 def checktype(df: pd.DataFrame):
