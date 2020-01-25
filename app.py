@@ -49,17 +49,20 @@ def main():
 			     columns)
 		# st.write('You selected:', options)
 		linear = st.checkbox('Plot Linear Regression')
-		st.sidebar.button("Show graph")
+		graphbtn = st.sidebar.button("Show graph")
 
 		if len(options) == 2:
 			if linear:
-				plot2(data[options[0]], data[options[1]], linear)
-			else:
-				st.write("not linear")
-				plt.clf()
-				plt.plot(data[options[0]], data[options[1]], '.')
-				st.pyplot()
-				st.write("plz plot")
+				X = data[options[0]].values.reshape(-1, 1)  # values converts it into a numpy array
+				Y = data[options[1]].values.reshape(-1, 1)
+				linear_regressor = LinearRegression()  # create object for the class
+				linear_regressor.fit(X, Y)  # perform linear regression
+				Y_pred = linear_regressor.predict(X)  # make predictions
+				plt.plot(X, Y_pred, color='red')
+			st.write("no")
+			plt.plot(data[options[0]], data[options[1]], '.')
+			st.pyplot()
+			plt.clf()
 
 		elif len(options) == 3:
 			plot3(data[options[0]], data[options[1]], data[options[2]])
