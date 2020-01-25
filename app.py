@@ -52,6 +52,9 @@ def main():
 		graphbtn = st.sidebar.button("Show graph")
 
 		if len(options) == 2:
+
+			st.write("no")
+			plt.plot(data[options[0]], data[options[1]], '.')
 			if linear:
 				X = data[options[0]].values.reshape(-1, 1)  # values converts it into a numpy array
 				Y = data[options[1]].values.reshape(-1, 1)
@@ -59,8 +62,6 @@ def main():
 				linear_regressor.fit(X, Y)  # perform linear regression
 				Y_pred = linear_regressor.predict(X)  # make predictions
 				plt.plot(X, Y_pred, color='red')
-			st.write("no")
-			plt.plot(data[options[0]], data[options[1]], '.')
 			st.pyplot()
 			plt.clf()
 
