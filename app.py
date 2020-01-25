@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, History
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Flatten
 import random
@@ -21,29 +21,31 @@ import warnings
 
 
 def main():
+    options = pd.DataFrame()
+    data = np.array([])
+
     st.sidebar.title("File options")
     uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
     if uploaded_file is not None:
         data = pd.read_csv(uploaded_file)
 
-
     st.title("Data Visualization 101")
     st.markdown(
         """
-Our demo will be running on [Chevron's dataset](https://datathon.rice.edu/static/chevronChallenge.zip) as default. You can add 
-csv file as you want.
+    Our demo will be running on [Chevron's dataset](https://datathon.rice.edu/static/chevronChallenge.zip) as default. You can add 
+    csv file as you want.
 
-"""
+    """
     )
 
     if uploaded_file is not None:
-    	
+
         st.header("Data Exploration")
         st.markdown(
-                """
-                If you choose one or more parameters to explore, it will generate default summary. If you choose two parameters,
-                it will plot graph for the first parameter over the second parameter.
-                """)
+            """
+            If you choose one or more parameters to explore, it will generate default summary. If you choose two parameters,
+            it will plot graph for the first parameter over the second parameter.
+            """)
         agree = st.checkbox("show raw data")
         if agree:
             st.write(data)
@@ -73,24 +75,25 @@ csv file as you want.
         st.pyplot()
         plt.clf()
 
+    cor_btn = st.sidebar.button('Show Correlation Plot')
+    if cor_btn:
+        plot_correlation(data, columns)
 
-    num_data = data[columns]
-    plot_correlation(data, columns)
+    if len(data)>0:
+	    st.sidebar.title('Nerual Nets')
 
-    st.sidebar.title('Nerual Nets')
+	    test_train_split_slider = st.sidebar.slider('validation_split', 0.0, 1.0, 0.01, 0.2)
+	    training = st.sidebar.multiselect(
+	        'Choose training to explore',
+	        columns)
+	    target = st.sidebar.selectbox(
+	        'Choose a target',
+	        columns)
+	    number = st.number_input('Training epoch')
+	    trainbtn = st.sidebar.button("Train model")
 
-    test_train_split_slider = st.sidebar.slider('training data %', 0, len(data), math.floor(0.2 * len(data)))
-    trainbtn = st.sidebar.button("Train model")
-    training = st.sidebar.multiselect(
-    'Choose training to explore',
-    columns)
-    target = st.sidebar.multiselect(
-    'Choose target to explore',
-    columns)
-    number = st.number_input('Insert a number')
-    if trainbtn:
-        neural_nets(data, training, target)
-        
+	    if trainbtn:
+	        neural_nets(data, training, target)
 
 
 def checktype(df: pd.DataFrame):
@@ -162,11 +165,7 @@ def plot_correlation(data, columns):
     plt.yticks(range(len(columns)), columns, fontsize=14)
     cb = plt.colorbar()
     cb.ax.tick_params(labelsize=14)
-    plt.title('Correlation Matrix', fontsize=16)
     st.pyplot()
-
-
-# plt.clf()
 
 
 def histogram_intersection(a, b):
@@ -178,32 +177,33 @@ def corelation_coefficient(data):
     df = pd.DataFrame([data[options[0]], data[options[1]]], columns=options)
     df.corr(method=histogram_intersection)
 
+
 def neural_nets(data, training, target):
-	train = data[training]
-	target = data[target]
+    train = data[training]
+    target = data[target]
 
-	NN_model = Sequential()
+    NN_model = Sequential()
 
-	# The Input Layer :
-	NN_model.add(Dense(128, kernel_initializer='normal',input_dim = train.shape[1], activation='relu'))
+    # The Input Layer :
+    NN_model.add(Dense(128, kernel_initializer='normal', input_dim=train.shape[1], activation='relu'))
 
-	# The Hidden Layers :
-	NN_model.add(Dense(256, kernel_initializer='normal',activation='relu'))
-	NN_model.add(Dense(256, kernel_initializer='normal',activation='relu'))
-	NN_model.add(Dense(256, kernel_initializer='normal',activation='relu'))
+    # The Hidden Layers :
+    NN_model.add(Dense(256, kernel_initializer='normal', activation='relu'))
+    NN_model.add(Dense(256, kernel_initializer='normal', activation='relu'))
+    NN_model.add(Dense(256, kernel_initializer='normal', activation='relu'))
 
-	# The Output Layer :
-	NN_model.add(Dense(1, kernel_initializer='normal',activation='linear'))
+    # The Output Layer :
+    NN_model.add(Dense(1, kernel_initializer='normal', activation='linear'))
 
-	# Compile the network :
-	NN_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mean_absolute_error'])
-	st.write(NN_model.summary())
-	
-	checkpoint_name = 'Weights-{epoch:03d}--{val_loss:.5f}.hdf5' 
-	checkpoint = ModelCheckpoint(checkpoint_name, monitor='val_loss', verbose = 1, save_best_only = True, mode ='auto')
-	callbacks_list = [checkpoint]
-	print(callbacks_list)
-	NN_model.fit(train, target, epochs=20, batch_size=32, validation_split = 0.2, callbacks=callbacks_list)
+    # Compile the network :
+    NN_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mean_absolute_error'])
+    st.write(NN_model.summary())
+
+    checkpoint_name = 'Weights-{epoch:03d}--{val_loss:.5f}.hdf5'
+    checkpoint = ModelCheckpoint(checkpoint_name, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
+    history = History()
+    callbacks_list = [checkpoint, history]
+    NN_model.fit(train, target, epochs=20, batch_size=32, validation_split=0.2, callbacks=callbacks_list)
 
 
 # corelation_coefficient(data)
