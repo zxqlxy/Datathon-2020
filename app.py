@@ -75,7 +75,7 @@ def main():
 
         options = st.sidebar.multiselect(
             'Choose parameters to explore',
-            columns)
+            data.columns)
 
         if options:
             st.write(data[options].describe())
@@ -121,7 +121,13 @@ def main():
 def checktype(df: pd.DataFrame):
     values = df.dtypes
     typeDic = values.to_dict()
-    numDic = dict(filter(lambda elem: elem[1] == "float64" or elem[1] == "int64" or elem[1] == "object", typeDic.items()))
+    numDic = dict(filter(lambda elem: elem[1] == "float64" or elem[1] == "int64", typeDic.items())) or elem[1] == "object"
+    return list(numDic.keys())
+
+def checktype_object(df: pd.DataFrame):
+    values = df.dtypes
+    typeDic = values.to_dict()
+    numDic = dict(filter(lambda elem: elem[1] == "object", typeDic.items()))
     return list(numDic.keys())
 
 
