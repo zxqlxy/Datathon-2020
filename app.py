@@ -10,7 +10,11 @@ from sklearn import datasets
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 import random
+
+import warnings
+
 
 def main():
 	st.sidebar.title("File options")
@@ -33,26 +37,31 @@ def main():
 
 	st.sidebar.button("Show graph")
 
+	if uploaded_file is not None:
 
+		st.write(data.describe())
+		dhead = data.head(10)
+		columns = checktype(dhead)
+		# for col in data.columns: 
+		#     print(col) 
+		#     st.button(col)
 
-	st.write(data.describe())
-	dhead = data.head(10)
-	columns = checktype(dhead)
-	# for col in data.columns: 
-	#     print(col) 
-	#     st.button(col)
+		options = st.sidebar.multiselect(
+			     'Choose two parameter to plot',
+		         # ('Yellow', 'Red')
+			     columns)
+		# st.write('You selected:', options)
+		linear = st.checkbox('Plot Linear Regression')
 
-	options = st.sidebar.multiselect(
-		     'Choose two parameter to plot',
-	         # ('Yellow', 'Red')
-		     columns)
-	# st.write('You selected:', options)
-	if len(options) == 2:
-		plot2(data[options[0]], data[options[1]])
-	elif len(options) == 3:
-		plot3(data[options[0]], data[options[1]], data[options[2]])
-	
-	num_data = data[columns]
+		if len(options) == 2:
+			plot2(data[options[0]], data[options[1]], linear)
+		elif len(options) == 3:
+			plot3(data[options[0]], data[options[1]], data[options[2]])
+		
+		num_data = data[columns]
+
+		# plot_Reg(num_data, options)
+		plot_correlation(data, columns)
 
 
 
@@ -63,10 +72,19 @@ def checktype(df : pd.DataFrame):
 	numDic = dict(filter(lambda elem: elem[1] == "float64" or elem[1] == "int64", typeDic.items()))
 	return list(numDic.keys())
 
+@st.cache(suppress_st_warning=True)
+def plot2(x,y, linear):
+	if linear:
+		X = x.values.reshape(-1, 1)  # values converts it into a numpy array
+		Y = y.values.reshape(-1, 1)
+		linear_regressor = LinearRegression()  # create object for the class
+		linear_regressor.fit(X, Y)  # perform linear regression
+		Y_pred = linear_regressor.predict(X)  # make predictions
+		plt.plot(X, Y_pred, color='red')
 
-def plot2(x,y):
 	plt.plot(x,y, '.')
 	st.pyplot()
+	plt.clf()
 
 
 def plot3(x, y,z):
@@ -107,8 +125,8 @@ def plot_PCA(num_data, option='standard'):
     plt.clf()
 
 # plot_PCA();
-
-def plot_correlation():
+@st.cache(suppress_st_warning=True)
+def plot_correlation(data, columns):
 	f = plt.figure(figsize=(19, 15))
 	plt.matshow(data.corr(), fignum=f.number)
 	plt.xticks(range(len(columns)), columns, fontsize=14, rotation=45)
@@ -119,15 +137,6 @@ def plot_correlation():
 	st.pyplot()
 	plt.clf()
 
-def plot_Reg(data):
-    X = data[options[0]].values.reshape(1, -1)  # values converts it into a numpy array
-    Y = data[options[1]].values.reshape(1, -1)  # -1 means that calculate the dimension of rows, but have 1 column
-    linear_regressor = LinearRegression()  # create object for the class
-    linear_regressor.fit(X, Y)  # perform linear regression
-    Y_pred = linear_regressor.predict(X)  # make predictions
-    plt.scatter(X, Y)
-    plt.plot(X, Y_pred, color='red')
-    st.pyplot()
 
 
 def histogram_intersection(a, b):
@@ -140,10 +149,8 @@ def corelation_coefficient(data):
     df.corr(method=histogram_intersection)
 
 
-plot_Reg(data)
-corelation_coefficient(data)
+# corelation_coefficient(data)
 
-# plot_correlation()
 # progress_bar = st.progress(0)
 # status_text = st.empty()
 # chart = st.line_chart(np.random.randn(10, 2))
@@ -168,4 +175,5 @@ corelation_coefficient(data)
 # st.balloons()
 
 if __name__ == '__main__':
-    main()
+	warnings.filterwarnings('ignore')
+	main()
