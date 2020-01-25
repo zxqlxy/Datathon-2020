@@ -119,6 +119,29 @@ def plot_correlation():
 	st.pyplot()
 	plt.clf()
 
+def plot_Reg(data):
+    X = data[options[0]].values.reshape(1, -1)  # values converts it into a numpy array
+    Y = data[options[1]].values.reshape(1, -1)  # -1 means that calculate the dimension of rows, but have 1 column
+    linear_regressor = LinearRegression()  # create object for the class
+    linear_regressor.fit(X, Y)  # perform linear regression
+    Y_pred = linear_regressor.predict(X)  # make predictions
+    plt.scatter(X, Y)
+    plt.plot(X, Y_pred, color='red')
+    st.pyplot()
+
+
+def histogram_intersection(a, b):
+    v = np.minimum(a, b).sum().round(decimals=1)
+    return v
+
+
+def corelation_coefficient(data):
+    df = pd.DataFrame([data[options[0]], data[options[1]]], columns=options)
+    df.corr(method=histogram_intersection)
+
+
+plot_Reg(data)
+corelation_coefficient(data)
 
 # plot_correlation()
 # progress_bar = st.progress(0)
