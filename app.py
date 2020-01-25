@@ -16,29 +16,29 @@ from sklearn.linear_model import LinearRegression
 # from keras.models import Sequential
 # from keras.layers import Dense, Activation, Flatten
 import random
-import tensorflow as tf
-from tensorflow.keras import Model
-from tensorflow.keras.layers import Dense, Flatten, Conv2D
+# import tensorflow as tf
+# from tensorflow.keras import Model
+# from tensorflow.keras.layers import Dense, Flatten, Conv2D
 
 import warnings
 
-data = pd.read_csv('training.csv')
+#data = pd.read_csv('training.csv')
 
 
-class MyModel(Model):
-  def __init__(self):
-    super(MyModel, self).__init__()
-    self.conv1 = Conv2D(32, 3, activation='relu')
-    self.flatten = Flatten()
-    self.d1 = Dense(128, activation='relu')
-    self.d2 = Dense(10, activation='softmax')
-
-  def call(self, x):
-    x = self.d1(x)
-    return self.d2(x)
-
-# Create an instance of the model
-model = MyModel()
+# class MyModel(Model):
+#   def __init__(self):
+#     super(MyModel, self).__init__()
+#     self.conv1 = Conv2D(32, 3, activation='relu')
+#     self.flatten = Flatten()
+#     self.d1 = Dense(128, activation='relu')
+#     self.d2 = Dense(10, activation='softmax')
+#
+#   def call(self, x):
+#     x = self.d1(x)
+#     return self.d2(x)
+#
+# # Create an instance of the model
+# model = MyModel()
 
 def main():
     options = pd.DataFrame()
@@ -80,11 +80,20 @@ def main():
         if options:
             st.write(data[options].describe())
 
+        cor_btn = st.sidebar.checkbox('Show Correlation Plot')
+        if cor_btn:
+            plot_correlation(data, columns)
+
     if len(options) == 2 and not (isinstance(data[options[0]][1], str) and isinstance(data[options[0]][1], str)):
-        print(isinstance(data[options[0]][1], str))
-        print(isinstance(data[options[1]][1], str))
         linear = st.checkbox('Plot Linear Regression')
         graphbtn = st.sidebar.button("Show graph")
+        st.markdown(
+            """
+        The graph below is the scatter point graph of variable a vs variable b, if desired, you can plot the 
+        regression line on the plot by checking the box above
+
+        """
+        )
         plt.plot(data[options[0]], data[options[1]], '.')
         if linear:
             X = data[options[0]].values.reshape(-1, 1)  # values converts it into a numpy array
@@ -94,12 +103,12 @@ def main():
             Y_pred = linear_regressor.predict(X)  # make predictions
             plt.plot(X, Y_pred, color='red')
         plt.title(options[0] + ' vs ' + options[1])
+        plt.xlabel(options[0])
+        plt.ylabel(options[1])
         st.pyplot()
         plt.clf()
 
-    cor_btn = st.sidebar.checkbox('Show Correlation Plot')
-    if cor_btn:
-        plot_correlation(data, columns)
+
 
     if len(data)>0:
 	    st.sidebar.title('Nerual Nets')
@@ -208,9 +217,9 @@ def corelation_coefficient(data):
 
 
 
-@tf.function
-
-def neural_nets(model, data, training, target):
+# @tf.function
+#
+# def neural_nets(model, data, training, target):
     # training = data[data.columns[5]]
     # target = data[data.columns[5]]
     #
@@ -244,65 +253,65 @@ def neural_nets(model, data, training, target):
     # callbacks_list = [checkpoint, history]
     # NN_model.fit(train, target, epochs=20, batch_size=32, validation_split=0.2, callbacks=callbacks_list)
     # print(History)
-
-    train_ds = tf.data.Dataset.from_tensor_slices(
-        (train, target)).shuffle(10000).batch(32)
-
-    test_ds = tf.data.Dataset.from_tensor_slices((train, target)).batch(32)
-
-    loss_object = tf.keras.losses.SparseCategoricalCrossentropy()
-
-    optimizer = tf.keras.optimizers.Adam()
-    train_loss = tf.keras.metrics.Mean(name='train_loss')
-    train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
-
-    test_loss = tf.keras.metrics.Mean(name='test_loss')
-    test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
-
-    @tf.function
-    def train_step(model, images, labels):
-        with tf.GradientTape() as tape:
-            # training=True is only needed if there are layers with different
-            # behavior during training versus inference (e.g. Dropout).
-            predictions = model(images, training=True)
-            loss = loss_object(labels, predictions)
-        gradients = tape.gradient(loss, model.trainable_variables)
-        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-
-        train_loss(loss)
-        train_accuracy(labels, predictions)
-
-    @tf.function
-    def test_step(model, images, labels):
-        # training=False is only needed if there are layers with different
-        # behavior during training versus inference (e.g. Dropout).
-        predictions = model(images, training=False)
-        t_loss = loss_object(labels, predictions)
-
-        test_loss(t_loss)
-        test_accuracy(labels, predictions)
-
-    EPOCHS =5
-    for epoch in range(EPOCHS):
-      # Reset the metrics at the start of the next epoch
-      train_loss.reset_states()
-      train_accuracy.reset_states()
-      test_loss.reset_states()
-      test_accuracy.reset_states()
-
-      for images, labels in train_ds:
-          print(images, labels)
-          train_step(model, images, labels)
-
-      for test_images, test_labels in train_ds:
-        test_step(model, test_images, test_labels)
-
-      template = 'Epoch {}, Loss: {}, Accuracy: {}, Test Loss: {}, Test Accuracy: {}'
-      print(template.format(epoch+1,
-                            train_loss.result(),
-                            train_accuracy.result()*100,
-                            test_loss.result(),
-                            test_accuracy.result()*100))
+    #
+    # train_ds = tf.data.Dataset.from_tensor_slices(
+    #     (train, target)).shuffle(10000).batch(32)
+    #
+    # test_ds = tf.data.Dataset.from_tensor_slices((train, target)).batch(32)
+    #
+    # loss_object = tf.keras.losses.SparseCategoricalCrossentropy()
+    #
+    # optimizer = tf.keras.optimizers.Adam()
+    # train_loss = tf.keras.metrics.Mean(name='train_loss')
+    # train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
+    #
+    # test_loss = tf.keras.metrics.Mean(name='test_loss')
+    # test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
+    #
+    # @tf.function
+    # def train_step(model, images, labels):
+    #     with tf.GradientTape() as tape:
+    #         # training=True is only needed if there are layers with different
+    #         # behavior during training versus inference (e.g. Dropout).
+    #         predictions = model(images, training=True)
+    #         loss = loss_object(labels, predictions)
+    #     gradients = tape.gradient(loss, model.trainable_variables)
+    #     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+    #
+    #     train_loss(loss)
+    #     train_accuracy(labels, predictions)
+    #
+    # @tf.function
+    # def test_step(model, images, labels):
+    #     # training=False is only needed if there are layers with different
+    #     # behavior during training versus inference (e.g. Dropout).
+    #     predictions = model(images, training=False)
+    #     t_loss = loss_object(labels, predictions)
+    #
+    #     test_loss(t_loss)
+    #     test_accuracy(labels, predictions)
+    #
+    # EPOCHS =5
+    # for epoch in range(EPOCHS):
+    #   # Reset the metrics at the start of the next epoch
+    #   train_loss.reset_states()
+    #   train_accuracy.reset_states()
+    #   test_loss.reset_states()
+    #   test_accuracy.reset_states()
+    #
+    #   for images, labels in train_ds:
+    #       print(images, labels)
+    #       train_step(model, images, labels)
+    #
+    #   for test_images, test_labels in train_ds:
+    #     test_step(model, test_images, test_labels)
+    #
+    #   template = 'Epoch {}, Loss: {}, Accuracy: {}, Test Loss: {}, Test Accuracy: {}'
+    #   print(template.format(epoch+1,
+    #                         train_loss.result(),
+    #                         train_accuracy.result()*100,
+    #                         test_loss.result(),
+    #                         test_accuracy.result()*100))
 # corelation_coefficient(data)
 
 # progress_bar = st.progress(0)
