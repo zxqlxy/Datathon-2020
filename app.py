@@ -12,6 +12,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from keras.callbacks import ModelCheckpoint
+from keras.models import Sequential
+from keras.layers import Dense, Activation, Flatten
 import random
 
 import warnings
@@ -44,28 +47,20 @@ csv file as you want.
         agree = st.checkbox("show raw data")
         if agree:
             st.write(data)
-            
+
         dhead = data.head(10)
         columns = checktype(dhead)
-        # for col in data.columns:
-        #     print(col)
-        #     st.button(col)
 
         options = st.sidebar.multiselect(
             'Choose parameters to explore',
-            # ('Yellow', 'Red')
             columns)
-        # st.write('You selected:', options)
 
         if options:
-            
             st.write(data.describe()[options])
 
-    linear = st.checkbox('Plot Linear Regression')
-    graphbtn = st.sidebar.button("Show graph")
-
     if len(options) == 2:
-
+        linear = st.checkbox('Plot Linear Regression')
+        graphbtn = st.sidebar.button("Show graph")
         plt.plot(data[options[0]], data[options[1]], '.')
         if linear:
             X = data[options[0]].values.reshape(-1, 1)  # values converts it into a numpy array
@@ -78,21 +73,24 @@ csv file as you want.
         st.pyplot()
         plt.clf()
 
-    # elif len(options) == 3:
-    # 	plot3(data[options[0]], data[options[1]], data[options[2]])
-
-    # if linear:
-    # 	plot2(data[options[0]], data[options[1]], linear)
-    #
-    # else:
 
     num_data = data[columns]
-
-    # plot_Reg(num_data, options)
     plot_correlation(data, columns)
+
+    st.sidebar.title('Nerual Nets')
 
     test_train_split_slider = st.sidebar.slider('training data %', 0, len(data), math.floor(0.2 * len(data)))
     trainbtn = st.sidebar.button("Train model")
+    training = st.sidebar.multiselect(
+    'Choose training to explore',
+    columns)
+    target = st.sidebar.multiselect(
+    'Choose target to explore',
+    columns)
+    number = st.number_input('Insert a number')
+    if trainbtn:
+        neural_nets(data, training, target)
+        
 
 
 def checktype(df: pd.DataFrame):
@@ -179,6 +177,33 @@ def histogram_intersection(a, b):
 def corelation_coefficient(data):
     df = pd.DataFrame([data[options[0]], data[options[1]]], columns=options)
     df.corr(method=histogram_intersection)
+
+def neural_nets(data, training, target):
+	train = data[training]
+	target = data[target]
+
+	NN_model = Sequential()
+
+	# The Input Layer :
+	NN_model.add(Dense(128, kernel_initializer='normal',input_dim = train.shape[1], activation='relu'))
+
+	# The Hidden Layers :
+	NN_model.add(Dense(256, kernel_initializer='normal',activation='relu'))
+	NN_model.add(Dense(256, kernel_initializer='normal',activation='relu'))
+	NN_model.add(Dense(256, kernel_initializer='normal',activation='relu'))
+
+	# The Output Layer :
+	NN_model.add(Dense(1, kernel_initializer='normal',activation='linear'))
+
+	# Compile the network :
+	NN_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mean_absolute_error'])
+	st.write(NN_model.summary())
+	
+	checkpoint_name = 'Weights-{epoch:03d}--{val_loss:.5f}.hdf5' 
+	checkpoint = ModelCheckpoint(checkpoint_name, monitor='val_loss', verbose = 1, save_best_only = True, mode ='auto')
+	callbacks_list = [checkpoint]
+	print(callbacks_list)
+	NN_model.fit(train, target, epochs=20, batch_size=32, validation_split = 0.2, callbacks=callbacks_list)
 
 
 # corelation_coefficient(data)
