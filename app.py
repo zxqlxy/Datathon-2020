@@ -18,16 +18,16 @@ import warnings
 
 
 def main():
-	st.sidebar.title("File options")
-	uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
-	if uploaded_file is not None:
-		data = pd.read_csv(uploaded_file)
-		agree = st.checkbox("show raw data")
-		if agree:
-			st.write(data)
+    st.sidebar.title("File options")
+    uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
+    if uploaded_file is not None:
+        data = pd.read_csv(uploaded_file)
+        agree = st.checkbox("show raw data")
+        if agree:
+            st.write(data)
 
-	st.title("Data Visualization 101")
-	st.markdown(
+    st.title("Data Visualization 101")
+    st.markdown(
         """
 Our demo will be running on [Chevron's dataset](https://datathon.rice.edu/static/chevronChallenge.zip) as default. You can add 
 csv file as you want.
@@ -35,96 +35,93 @@ csv file as you want.
 """
     )
 
-	if uploaded_file is not None:
+    if uploaded_file is not None:
 
-		dhead = data.head(10)
-		columns = checktype(dhead)
-		# for col in data.columns: 
-		#     print(col) 
-		#     st.button(col)
+        dhead = data.head(10)
+        columns = checktype(dhead)
+        # for col in data.columns:
+        #     print(col)
+        #     st.button(col)
 
-		options = st.sidebar.multiselect(
-			     'Choose two parameter to plot',
-		         # ('Yellow', 'Red')
-			     columns)
-		# st.write('You selected:', options)
+        options = st.sidebar.multiselect(
+            'Choose two parameter to plot',
+            # ('Yellow', 'Red')
+            columns)
+        # st.write('You selected:', options)
 
-		if options:
-			st.write(data.describe()[options])
+        if options:
+            st.write(data.describe()[options])
 
-		linear = st.checkbox('Plot Linear Regression')
-		graphbtn = st.sidebar.button("Show graph")
-		
+        linear = st.checkbox('Plot Linear Regression')
+        graphbtn = st.sidebar.button("Show graph")
 
-		if len(options) == 2:
+        if len(options) == 2:
 
-			plt.plot(data[options[0]], data[options[1]], '.')
-			if linear:
-				X = data[options[0]].values.reshape(-1, 1)  # values converts it into a numpy array
-				Y = data[options[1]].values.reshape(-1, 1)
-				linear_regressor = LinearRegression()  # create object for the class
-				linear_regressor.fit(X, Y)  # perform linear regression
-				Y_pred = linear_regressor.predict(X)  # make predictions
-				plt.plot(X, Y_pred, color='red')
-			plt.title(options[0] + ' vs ' + options[1])
-			st.pyplot()
-			plt.clf()
+            plt.plot(data[options[0]], data[options[1]], '.')
+            if linear:
+                X = data[options[0]].values.reshape(-1, 1)  # values converts it into a numpy array
+                Y = data[options[1]].values.reshape(-1, 1)
+                linear_regressor = LinearRegression()  # create object for the class
+                linear_regressor.fit(X, Y)  # perform linear regression
+                Y_pred = linear_regressor.predict(X)  # make predictions
+                plt.plot(X, Y_pred, color='red')
+            plt.title(options[0] + ' vs ' + options[1])
+            st.pyplot()
+            plt.clf()
 
-		# elif len(options) == 3:
-		# 	plot3(data[options[0]], data[options[1]], data[options[2]])
+        # elif len(options) == 3:
+        # 	plot3(data[options[0]], data[options[1]], data[options[2]])
 
-		# if linear:
-		# 	plot2(data[options[0]], data[options[1]], linear)
-		#
-		# else:
+        # if linear:
+        # 	plot2(data[options[0]], data[options[1]], linear)
+        #
+        # else:
 
-		num_data = data[columns]
+        num_data = data[columns]
 
-		# plot_Reg(num_data, options)
-		plot_correlation(data, columns)
+        # plot_Reg(num_data, options)
+        plot_correlation(data, columns)
 
-
-		test_train_split_slider = st.sidebar.slider('training data %', 0, len(data), math.floor(0.2 * len(data)))
-		trainbtn = st.sidebar.button("Train model")
+        test_train_split_slider = st.sidebar.slider('training data %', 0, len(data), math.floor(0.2 * len(data)))
+        trainbtn = st.sidebar.button("Train model")
 
 
+def checktype(df: pd.DataFrame):
+    values = df.dtypes
+    typeDic = values.to_dict()
+    numDic = dict(filter(lambda elem: elem[1] == "float64" or elem[1] == "int64", typeDic.items()))
+    return list(numDic.keys())
 
-def checktype(df : pd.DataFrame):
-
-	values = df.dtypes
-	typeDic = values.to_dict()
-	numDic = dict(filter(lambda elem: elem[1] == "float64" or elem[1] == "int64", typeDic.items()))
-	return list(numDic.keys())
 
 @st.cache(suppress_st_warning=True)
-def plot2(x,y, linear):
-	if linear:
-		X = x.values.reshape(-1, 1)  # values converts it into a numpy array
-		Y = y.values.reshape(-1, 1)
-		linear_regressor = LinearRegression()  # create object for the class
-		linear_regressor.fit(X, Y)  # perform linear regression
-		Y_pred = linear_regressor.predict(X)  # make predictions
-		plt.plot(X, Y_pred, color='red')
-	st.write("no")
-	plt.plot(x,y, '.')
-	st.pyplot()
-	plt.clf()
+def plot2(x, y, linear):
+    if linear:
+        X = x.values.reshape(-1, 1)  # values converts it into a numpy array
+        Y = y.values.reshape(-1, 1)
+        linear_regressor = LinearRegression()  # create object for the class
+        linear_regressor.fit(X, Y)  # perform linear regression
+        Y_pred = linear_regressor.predict(X)  # make predictions
+        plt.plot(X, Y_pred, color='red')
+    st.write("no")
+    plt.plot(x, y, '.')
+    st.pyplot()
+    plt.clf()
 
 
-def plot3(x, y,z):
-	fig = plt.figure()
-	ax = fig.add_subplot(111, projection='3d')
+def plot3(x, y, z):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
 
-	n = 100
+    n = 100
 
-	# For each set of style and range settings, plot n random points in the box
-	# defined by x in [23, 32], y in [0, 100], z in [zlow, zhigh].
-	for i in range(x):
-	    ax.scatter(x[i], y[i], z[i], marker=m)
+    # For each set of style and range settings, plot n random points in the box
+    # defined by x in [23, 32], y in [0, 100], z in [zlow, zhigh].
+    for i in range(x):
+        ax.scatter(x[i], y[i], z[i], marker=m)
 
-	ax.set_xlabel('X Label')
-	ax.set_ylabel('Y Label')
-	ax.set_zlabel('Z Label')	
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
 
 
 def plot_PCA(num_data, option='standard'):
@@ -148,19 +145,21 @@ def plot_PCA(num_data, option='standard'):
     st.pyplot()
     plt.clf()
 
+
 # plot_PCA();
 @st.cache(suppress_st_warning=True)
 def plot_correlation(data, columns):
-	f = plt.figure(figsize=(19, 15))
-	plt.matshow(data.corr(), fignum=f.number)
-	plt.xticks(range(len(columns)), columns, fontsize=14, rotation=45)
-	plt.yticks(range(len(columns)), columns, fontsize=14)
-	cb = plt.colorbar()
-	cb.ax.tick_params(labelsize=14)
-	plt.title('Correlation Matrix', fontsize=16)
-	st.pyplot()
-	# plt.clf()
+    f = plt.figure(figsize=(19, 15))
+    plt.matshow(data.corr(), fignum=f.number)
+    plt.xticks(range(len(columns)), columns, fontsize=14, rotation=45)
+    plt.yticks(range(len(columns)), columns, fontsize=14)
+    cb = plt.colorbar()
+    cb.ax.tick_params(labelsize=14)
+    plt.title('Correlation Matrix', fontsize=16)
+    st.pyplot()
 
+
+# plt.clf()
 
 
 def histogram_intersection(a, b):
@@ -199,5 +198,5 @@ def corelation_coefficient(data):
 # st.balloons()
 
 if __name__ == '__main__':
-	warnings.filterwarnings('ignore')
-	main()
+    warnings.filterwarnings('ignore')
+    main()
