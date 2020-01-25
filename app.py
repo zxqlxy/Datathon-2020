@@ -28,15 +28,15 @@ def main():
 
 	st.title("Data Visualization 101")
 	st.markdown(
-	        """## Important Notes
+        """
+Our demo will be running on [Chevron's dataset](https://datathon.rice.edu/static/chevronChallenge.zip) as default. You can add 
+csv file as you want.
 
-	We will run a demo that uses the Chevron Dataset to train and test a machine learning model.
-
-	""")
+"""
+    )
 
 	if uploaded_file is not None:
 
-		st.write(data.describe())
 		dhead = data.head(10)
 		columns = checktype(dhead)
 		# for col in data.columns: 
@@ -66,6 +66,7 @@ def main():
 				linear_regressor.fit(X, Y)  # perform linear regression
 				Y_pred = linear_regressor.predict(X)  # make predictions
 				plt.plot(X, Y_pred, color='red')
+			plt.title(options[0] + ' vs ' + options[1])
 			st.pyplot()
 			plt.clf()
 
