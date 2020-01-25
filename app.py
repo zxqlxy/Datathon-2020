@@ -30,10 +30,8 @@ def main():
 	st.markdown(
 	        """## Important Notes
 
-	This app requires the Awesome Streamlit package.
-	The Awesome Streamlit package can be installed using
+	We will run a demo that uses the Chevron Dataset to train and test a machine learning model.
 
-	`pip install awesome-streamlit`
 	""")
 
 	if uploaded_file is not None:
@@ -54,19 +52,23 @@ def main():
 		st.sidebar.button("Show graph")
 
 		if len(options) == 2:
-			plot2(data[options[0]], data[options[1]], False)
+			if linear:
+				plot2(data[options[0]], data[options[1]], linear)
+			else:
+				st.write("not linear")
+				plt.clf()
+				plt.plot(data[options[0]], data[options[1]], '.')
+				st.pyplot()
+				st.write("plz plot")
+
 		elif len(options) == 3:
 			plot3(data[options[0]], data[options[1]], data[options[2]])
 
-		if linear:
-			plot2(data[options[0]], data[options[1]], linear)
+		# if linear:
+		# 	plot2(data[options[0]], data[options[1]], linear)
+		#
+		# else:
 
-		else:
-			st.write("not linear")
-			plt.clf()
-			plt.plot(data[options[0]], data[options[1]], '.')
-			st.pyplot()
-			st.write("plz plot")
 		num_data = data[columns]
 
 		# plot_Reg(num_data, options)
