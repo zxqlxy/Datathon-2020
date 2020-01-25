@@ -12,6 +12,20 @@ from sklearn.multioutput import MultiOutputRegressor
 from sklearn.model_selection import train_test_split
 import random
 
+st.sidebar.title("File options")
+uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
+
+st.title("Data Visualization 101")
+st.markdown(
+        """## Important Notes
+
+This app requires the Awesome Streamlit package.
+The Awesome Streamlit package can be installed using
+
+`pip install awesome-streamlit`
+""")
+
+st.sidebar.button("Show graph")
 
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 if uploaded_file is not None:
