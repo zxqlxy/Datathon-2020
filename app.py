@@ -21,24 +21,25 @@ from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D
 
 import warnings
+import plotly.express as px
 
 data = pd.read_csv('training.csv')
 
 
-class MyModel(Model):
-  def __init__(self):
-    super(MyModel, self).__init__()
-    self.conv1 = Conv2D(32, 3, activation='relu')
-    self.flatten = Flatten()
-    self.d1 = Dense(128, activation='relu')
-    self.d2 = Dense(10, activation='softmax')
-
-  def call(self, x):
-    x = self.d1(x)
-    return self.d2(x)
-
-# Create an instance of the model
-model = MyModel()
+# class MyModel(Model):
+#   def __init__(self):
+#     super(MyModel, self).__init__()
+#     self.conv1 = Conv2D(32, 3, activation='relu')
+#     self.flatten = Flatten()
+#     self.d1 = Dense(128, activation='relu')
+#     self.d2 = Dense(10, activation='softmax')
+#
+#   def call(self, x):
+#     x = self.d1(x)
+#     return self.d2(x)
+#
+# # Create an instance of the model
+# model = MyModel()
 
 def main():
     options = pd.DataFrame()
@@ -48,8 +49,31 @@ def main():
     uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
     if uploaded_file is not None:
         data = pd.read_csv(uploaded_file)
+        columns = checktype(data)
 
-    st.title("Data Visualization 101")
+        pointsToUse = st.sidebar.slider("How many data points do we need?", 0, len(data))
+        # Otherwise, use entire dataset, same as setting slider to len(data)
+        if st.sidebar.button("Select"):
+            data = data.head(pointsToUse)
+
+        option = st.sidebar.selectbox(
+            'Choose parameter to sort by',
+            # Alway sort by the first parameter selected
+            columns)
+
+        sortBtn = st.sidebar.button("Sort by column " + option)
+        ascending = st.sidebar.checkbox("ascending order")
+        if sortBtn:
+            if ascending:
+                data = data.sort_values(by=option)
+            else:
+                data = data.sort_values(by=option, ascending=False)
+
+        agree = st.checkbox("show raw data")
+        if agree:
+            st.write(data)
+
+    st.title("Automated Data Visualization and Maching Learning Tool")
     st.markdown(
         """
     Our demo will be running on [Chevron's dataset](https://datathon.rice.edu/static/chevronChallenge.zip) as default. You can add 
@@ -66,9 +90,6 @@ def main():
             If you choose one or more parameters to explore, it will generate default summary. If you choose two parameters,
             it will plot graph for the first parameter over the second parameter.
             """)
-        agree = st.checkbox("show raw data")
-        if agree:
-            st.write(data)
 
         dhead = data.head(10)
         columns = checktype(dhead)
@@ -96,26 +117,35 @@ def main():
         plt.title(options[0] + ' vs ' + options[1])
         st.pyplot()
         plt.clf()
+    if uploaded_file is not None:
+        cor_btn = st.sidebar.checkbox('Show Correlation Plot')
+        if cor_btn:
+            with st.spinner('Wait for it...'):
+                time.sleep(5)
+            st.write(plot_correlation(data, columns))
 
-    cor_btn = st.sidebar.checkbox('Show Correlation Plot')
-    if cor_btn:
-        plot_correlation(data, columns)
+        options = st.sidebar.multiselect(
+            'Choose two parameters to plot as latitude and longitude',
+            columns)
+        if st.sidebar.button("Map Location of DataSet"):
+            st.header("Location of data points")
+            st.write(plotmap(data, options[0], options[1]))
 
-    if len(data)>0:
-	    st.sidebar.title('Nerual Nets')
+        if len(data) > 0:
+            st.sidebar.title('Nerual Nets')
 
-	    test_train_split_slider = st.sidebar.slider('validation_split', 0.0, 1.0, 0.01, 0.2)
-	    training = st.sidebar.multiselect(
-	        'Choose training to explore',
-	        columns)
-	    target = st.sidebar.selectbox(
-	        'Choose a target',
-	        columns)
-	    number = st.number_input('Training epoch')
-	    trainbtn = st.sidebar.button("Train model")
+            test_train_split_slider = st.sidebar.slider('validation_split', 0.0, 1.0, 0.01, 0.2)
+            training = st.sidebar.multiselect(
+                'Choose training to explore',
+                columns)
+            target = st.sidebar.selectbox(
+                'Choose a target',
+                columns)
+            number = st.number_input('Training epoch')
+            trainbtn = st.sidebar.button("Train model")
 
-	    if trainbtn:
-	        neural_nets(model, data, training, target)
+            if trainbtn:
+                neural_nets(model, data, training, target)
 
 
 def checktype(df: pd.DataFrame):
@@ -130,6 +160,12 @@ def checktype_object(df: pd.DataFrame):
     numDic = dict(filter(lambda elem: elem[1] == "object", typeDic.items()))
     return list(numDic.keys())
 
+@st.cache(suppress_st_warning=True)
+def plotmap(data, latitude, longitude):
+	fig = px.scatter_mapbox(data, lat=latitude, lon=longitude, size="FIRE_SIZE", hover_data=["FIRE_SIZE", "STATE"],
+							color_discrete_sequence=["fuchsia"], size_max=10, zoom=3, height=600, width=800)
+	fig.update_layout(mapbox_style="open-street-map")
+	return fig
 
 @st.cache(suppress_st_warning=True)
 def plot2(x, y, linear):
@@ -140,7 +176,6 @@ def plot2(x, y, linear):
         linear_regressor.fit(X, Y)  # perform linear regression
         Y_pred = linear_regressor.predict(X)  # make predictions
         plt.plot(X, Y_pred, color='red')
-    st.write("no")
     plt.plot(x, y, '.')
     st.pyplot()
     plt.clf()
@@ -185,7 +220,7 @@ def plot_PCA(num_data, option='standard'):
 
 
 # plot_PCA();
-@st.cache(suppress_st_warning=True)
+# @st.cache(suppress_st_warning=True)
 def plot_correlation(data, columns):
     f = plt.figure(figsize=(19, 15))
     plt.matshow(data.corr(), fignum=f.number)
@@ -194,6 +229,7 @@ def plot_correlation(data, columns):
     cb = plt.colorbar()
     cb.ax.tick_params(labelsize=14)
     st.pyplot()
+    return f
 
 
 def histogram_intersection(a, b):
