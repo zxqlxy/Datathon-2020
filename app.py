@@ -48,12 +48,16 @@ def main():
 		         # ('Yellow', 'Red')
 			     columns)
 		# st.write('You selected:', options)
+
+		if options:
+			st.write(data.describe()[options])
+
 		linear = st.checkbox('Plot Linear Regression')
 		graphbtn = st.sidebar.button("Show graph")
+		
 
 		if len(options) == 2:
 
-			st.write("no")
 			plt.plot(data[options[0]], data[options[1]], '.')
 			if linear:
 				X = data[options[0]].values.reshape(-1, 1)  # values converts it into a numpy array
@@ -65,8 +69,8 @@ def main():
 			st.pyplot()
 			plt.clf()
 
-		elif len(options) == 3:
-			plot3(data[options[0]], data[options[1]], data[options[2]])
+		# elif len(options) == 3:
+		# 	plot3(data[options[0]], data[options[1]], data[options[2]])
 
 		# if linear:
 		# 	plot2(data[options[0]], data[options[1]], linear)
