@@ -60,7 +60,7 @@ def main():
         if options:
             st.write(data[options].describe())
 
-    if len(options) == 2 and (not isinstance(data[options[0]][1], str) and not isinstance(data[options[0]][1], str)):
+    if len(options) == 2 and not (isinstance(data[options[0]][1], str) and isinstance(data[options[0]][1], str)):
         print(isinstance(data[options[0]][1], str))
         print(isinstance(data[options[1]][1], str))
         linear = st.checkbox('Plot Linear Regression')
