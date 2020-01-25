@@ -12,9 +12,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from keras.callbacks import ModelCheckpoint, History
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Flatten
+# from keras.callbacks import ModelCheckpoint, History
+# from keras.models import Sequential
+# from keras.layers import Dense, Activation, Flatten
 import random
 import tensorflow as tf
 from tensorflow.keras import Model
@@ -78,9 +78,11 @@ def main():
             columns)
 
         if options:
-            st.write(data.describe()[options])
+            st.write(data[options].describe())
 
-    if len(options) == 2:
+    if len(options) == 2 and not (isinstance(data[options[0]][1], str) and isinstance(data[options[0]][1], str)):
+        print(isinstance(data[options[0]][1], str))
+        print(isinstance(data[options[1]][1], str))
         linear = st.checkbox('Plot Linear Regression')
         graphbtn = st.sidebar.button("Show graph")
         plt.plot(data[options[0]], data[options[1]], '.')
@@ -119,7 +121,7 @@ def main():
 def checktype(df: pd.DataFrame):
     values = df.dtypes
     typeDic = values.to_dict()
-    numDic = dict(filter(lambda elem: elem[1] == "float64" or elem[1] == "int64", typeDic.items()))
+    numDic = dict(filter(lambda elem: elem[1] == "float64" or elem[1] == "int64" or elem[1] == "object", typeDic.items()))
     return list(numDic.keys())
 
 
