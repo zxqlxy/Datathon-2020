@@ -82,6 +82,7 @@ def main():
     """
     )
 
+
     if uploaded_file is not None:
 
         st.header("Data Exploration")
