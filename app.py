@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+import math
 from sklearn import decomposition
 from sklearn.preprocessing import StandardScaler
 from sklearn import decomposition
@@ -35,8 +36,6 @@ def main():
 	`pip install awesome-streamlit`
 	""")
 
-	st.sidebar.button("Show graph")
-
 	if uploaded_file is not None:
 
 		st.write(data.describe())
@@ -52,16 +51,30 @@ def main():
 			     columns)
 		# st.write('You selected:', options)
 		linear = st.checkbox('Plot Linear Regression')
+		st.sidebar.button("Show graph")
 
 		if len(options) == 2:
-			plot2(data[options[0]], data[options[1]], linear)
+			plot2(data[options[0]], data[options[1]], False)
 		elif len(options) == 3:
 			plot3(data[options[0]], data[options[1]], data[options[2]])
-		
+
+		if linear:
+			plot2(data[options[0]], data[options[1]], linear)
+
+		else:
+			st.write("not linear")
+			plt.clf()
+			plt.plot(data[options[0]], data[options[1]], '.')
+			st.pyplot()
+			st.write("plz plot")
 		num_data = data[columns]
 
 		# plot_Reg(num_data, options)
 		plot_correlation(data, columns)
+
+
+		test_train_split_slider = st.sidebar.slider('training data %', 0, len(data), math.floor(0.2 * len(data)))
+		trainbtn = st.sidebar.button("Train model")
 
 
 
@@ -81,7 +94,7 @@ def plot2(x,y, linear):
 		linear_regressor.fit(X, Y)  # perform linear regression
 		Y_pred = linear_regressor.predict(X)  # make predictions
 		plt.plot(X, Y_pred, color='red')
-
+	st.write("no")
 	plt.plot(x,y, '.')
 	st.pyplot()
 	plt.clf()
@@ -135,7 +148,7 @@ def plot_correlation(data, columns):
 	cb.ax.tick_params(labelsize=14)
 	plt.title('Correlation Matrix', fontsize=16)
 	st.pyplot()
-	plt.clf()
+	# plt.clf()
 
 
 
